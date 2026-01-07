@@ -10,14 +10,15 @@ En modern plattform för att byta lägenheter med andra i Sverige. Byggd med Nex
 - **Automatisk geokodning** - Adressen konverteras till koordinater för kartan
 - **Sökning med karta** - Interaktiv karta med OpenStreetMap/Leaflet
 - **Avancerade filter** - Sök efter stad, antal rum, hyra, balkong, hiss, parkering, m.m.
+- **Lägenhetsvyer** - Detaljerad visning av enskilda lägenheter
+- **Intressematchningssystem** - Markera intressen, se ömsesidiga matchningar
+- **Meddelandesystem** - Chatta med användare vid ömsesidig matchning
 - **Responsiv design** - Snyggt UI med Tailwind CSS
 - **Snygg landing page** - Informativ startsida
 
 ### 🚧 Under utveckling
 - Interaktiv planlösningsritare
 - Bilduppladdning med rumskoppling
-- Intressematchningssystem
-- Meddelandesystem
 - Stripe-integration för abonnemang
 
 ## Teknologi
@@ -115,12 +116,23 @@ npm run dev
 3. Växla mellan kart- och listvy
 4. Klicka på en lägenhet för att se detaljer
 
+### Markera intresse
+1. När du hittat en lägenhet du gillar, klicka på hjärtat
+2. Gå till "Mina intressen" för att se:
+   - Lägenheter du är intresserad av
+   - Vem som visat intresse för din lägenhet
+   - Ömsesidiga matchningar (båda markerat intresse)
+
+### Chatta med matchningar
+1. Vid ömsesidig matchning kan ni chatta
+2. Gå till "Meddelanden" i menyn
+3. Välj en konversation och börja chatta
+4. Endast användare med ömsesidig matchning kan skicka meddelanden
+
 ## Kommande funktioner
 
 - **Planlösningsritare** - Rita och markera rum interaktivt
 - **Bilduppladdning** - Ladda upp och koppla bilder till rum
-- **Intressematchning** - Markera intressen och få mutual matches
-- **Meddelanden** - Chatta när båda visat intresse
 - **Betalning** - Stripe-abonnemang för tillgång till plattformen
 
 ## Deployment
