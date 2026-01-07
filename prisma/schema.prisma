@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  apartments    Apartment[]
+  interests     Interest[]
+  sentMessages  Message[]   @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+  subscription  Subscription?
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId String? @unique
+  stripeSubscriptionId String? @unique
+  stripePriceId String?
+  stripeCurrentPeriodEnd DateTime?
+  status    String   // active, canceled, past_due, etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Apartment {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Basic info
+  address     String
+  city        String
+  postalCode  String
+  latitude    Float
+  longitude   Float
+
+  // Details
+  rooms       Int
+  rent        Float
+  size        Float?   // Square meters
+
+  // Amenities
+  hasBalcony  Boolean  @default(false)
+  hasElevator Boolean  @default(false)
+  hasFireplace Boolean @default(false)
+  hasParking  Boolean  @default(false)
+  hasDishwasher Boolean @default(false)
+  hasWashingMachine Boolean @default(false)
+  petsAllowed Boolean  @default(false)
+
+  description String?  @db.Text
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  floorPlan   FloorPlan?
+  images      Image[]
+  interests   Interest[]
+}
+
+model FloorPlan {
+  id          String   @id @default(cuid())
+  apartmentId String   @unique
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  // JSON data containing the drawn floor plan
+  planData    String   @db.Text
+
+  rooms       FloorPlanRoom[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FloorPlanRoom {
+  id          String    @id @default(cuid())
+  floorPlanId String
+  floorPlan   FloorPlan @relation(fields: [floorPlanId], references: [id], onDelete: Cascade)
+
+  name        String    // "Vardagsrum", "Sovrum 1", "Kök", etc.
+  type        String    // "living_room", "bedroom", "kitchen", "bathroom", etc.
+
+  // Position in the floor plan (JSON data)
+  position    String    @db.Text
+
+  images      Image[]
+}
+
+model Image {
+  id          String    @id @default(cuid())
+  apartmentId String
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  roomId      String?
+  room        FloorPlanRoom? @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
+  url         String
+  caption     String?
+  order       Int       @default(0)
+
+  createdAt   DateTime  @default(now())
+}
+
+model Interest {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apartmentId     String
+  apartment       Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+
+  @@unique([userId, apartmentId])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  sender      User     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User     @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  content     String   @db.Text
+  read        Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+}
